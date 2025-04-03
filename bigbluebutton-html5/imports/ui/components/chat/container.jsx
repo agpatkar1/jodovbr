@@ -15,6 +15,8 @@ import Styled from '/imports/ui/components/chat/styles';
 import ChatService from './service';
 import { layoutSelect, layoutDispatch } from '../layout/context';
 import { escapeHtml } from '/imports/utils/string-utils';
+//import Meetings from '/imports/api/meetings';
+import getFromMeetingSettings from '../../services/meeting-settings';
 
 const CHAT_CONFIG = Meteor.settings.public.chat;
 const PUBLIC_CHAT_KEY = CHAT_CONFIG.public_id;
@@ -93,7 +95,7 @@ const ChatContainer = (props) => {
   const { welcomeProp } = ChatService.getWelcomeProp();
 
   ChatLogger.debug('ChatContainer::render::props', props);
-
+  
   const systemMessages = {
     [sysMessagesIds.welcomeId]: {
       id: sysMessagesIds.welcomeId,
@@ -224,40 +226,49 @@ const ChatContainer = (props) => {
     ['ReactVirtualized__Grid', 'ReactVirtualized__Grid__innerScrollContainer'],
     'role',
   );
+  
+  //const meeting = Meetings.findOne({ meetingId: Auth.meetingID });
+  //console.log('Meeting Data', meeting);
+  const jodo_chatlink = getFromMeetingSettings ('jodochatlink','');
+  //console.log('Meeting Meta Data', bbb_origin);
 
-  return (
-/*    <Chat {...{
-      idChatOpen,
-      isChatLocked,
-      ...restProps,
-      chatID,
-      amIModerator,
-      count: (contextChat?.unreadTimeWindows.size || 0),
-      timeWindowsValues: stateTimeWindows,
-      dispatch: usingChatContext?.dispatch,
-      title,
-      syncing: contextChat?.syncing,
-      syncedPercent: contextChat?.syncedPercent,
-      chatName,
-      contextChat,
-      layoutContextDispatch,
-      lastTimeWindowValuesBuild,
-      partnerIsLoggedOut,
-    }}
-    >
-      {children}
-    </Chat>
-*/
-    <Styled.IFrame
-      title="jodochat"
-      allow="geolocation"
-      src={`https://jodostaging.avhan.com:4443/meeting_chat_application/index.jsp?meetingid=${Auth.meetingID}&username=${Auth.fullname}`}
-      //aria-describedby="padEscapeHint"
-      //style={{
-      //  pointerEvents: isResizing ? 'none' : 'inherit',
-      //}}
-    />
-  );
+  if (jodo_chatlink == '') {
+    return (
+      <Chat {...{
+        idChatOpen,
+        isChatLocked,
+        ...restProps,
+        chatID,
+        amIModerator,
+        count: (contextChat?.unreadTimeWindows.size || 0),
+        timeWindowsValues: stateTimeWindows,
+        dispatch: usingChatContext?.dispatch,
+        title,
+        syncing: contextChat?.syncing,
+        syncedPercent: contextChat?.syncedPercent,
+        chatName,
+        contextChat,
+        layoutContextDispatch,
+        lastTimeWindowValuesBuild,
+        partnerIsLoggedOut,
+      }}
+      >
+        {children}
+      </Chat>
+    );
+  } else {
+    return (
+      <Styled.IFrame
+        title="jodochat"
+        allow="geolocation"
+        src={`${jodo_chatlink}?meetingid=${Auth.meetingID}&username=${Auth.fullname}&userid=${Auth.externUserID}`}
+        //aria-describedby="padEscapeHint"
+        //style={{
+        //  pointerEvents: isResizing ? 'none' : 'inherit',
+        //}}
+      />
+    );
+  }
 };
 
 export default lockContextContainer(injectIntl(withTracker(({ intl, userLocks }) => {
